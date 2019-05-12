@@ -3,7 +3,8 @@
 #include "Graph.h"
 
 int main() {
-    Graph g(6, 6);
+    Graph g(6, 9);
+
     g.addEdge(0, 1, 3);
     g.addEdge(0, 4, 3);
     g.addEdge(1, 2, 1);
@@ -14,7 +15,9 @@ int main() {
     g.addEdge(5, 0, 6);
     g.addEdge(5, 3, 1);
 
-    g.dijkstraList(0);
+    g.BellmanFord(0);
+    g.dijkstraMatrix(0);
+
 
     return 0;
 }
