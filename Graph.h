@@ -5,11 +5,12 @@
 #ifndef GRAPH_ALGORITHMS_GRAPH_H
 #define GRAPH_ALGORITHMS_GRAPH_H
 
-#include "ListElem.h"
 #include <iostream>
 #include <iomanip>
 #include <list>
 #include <queue>
+#include <algorithm>
+#include "DisjointSets.h"
 
 
 #define INF 0x3f3f3f3f
@@ -17,10 +18,6 @@
 using namespace std;
 
 typedef pair<int, int> iPair;
-
-struct Edge {
-    int src, dest, weight;
-};
 
 class Graph {
 public:
@@ -30,18 +27,20 @@ public:
     void dijkstraList(int s);
     void dijkstraMatrix(int s);
     void BellmanFord(int s);
-    int minDistance(int dist[], bool sptSet[]);
     void addEdge(int u, int v, int w);
-    struct Edge *edgeArray;
+    void addUndirectedEdge(int u, int v, int w);
+    void PrimList();
+    void PrimMatrix();
+    int kruskal();
+    void getEdgesMatrix();
+    vector< pair<int, iPair> > edge;
     int **adjacencyMatrix;
-    ListElem **adjacencyList;
-
 
 private:
     int vertices;
     int edges;
-    ListElem *e1, *e2;
     list< pair<int, int> > *adjList;
+
 
 };
 

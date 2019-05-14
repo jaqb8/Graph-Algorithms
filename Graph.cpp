@@ -11,9 +11,6 @@ Graph::Graph(int v, int e) {
     vertices = v;
     edges = 0;
     adjacencyMatrix = new int * [vertices];
-    adjacencyList = new ListElem * [vertices];
-    edgeArray = new Edge[edges];
-
     adjList = new list<iPair> [vertices];
 
     for(int i = 0; i < vertices; i++) adjacencyMatrix[i] = new int[vertices];
@@ -62,6 +59,20 @@ void Graph::print() {
 //    }
 }
 
+void Graph::getEdgesMatrix() {
+    int diagonal = 1;
+
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < diagonal; j++) {
+            int weight = adjacencyMatrix[i][j];
+            if(weight != 0) {
+                edge.push_back({weight, {i, j}});
+            }
+        }
+        diagonal++;
+    }
+}
+
 void Graph::dijkstraList(int s) {
     priority_queue< iPair, vector <iPair>, greater<iPair> > pq;
 
@@ -95,55 +106,28 @@ void Graph::dijkstraList(int s) {
 
 void Graph::addEdge(int u, int v, int w) {
     adjList[u].push_back(make_pair(v, w));
-    //adjList[v].push_back(make_pair(u, w));
     adjacencyMatrix[u][v] = w;
+    edge.push_back({w, {u, v}});
 
-    Edge *temp = new Edge[edges+1];
-    for(int i = 0; i < edges; i++) {
-        temp[i].src = edgeArray[i].src;
-        temp[i].dest = edgeArray[i].dest;
-        temp[i].weight = edgeArray[i].weight;
-    }
-    temp[edges].src = u;
-    temp[edges].dest = v;
-    temp[edges].weight = w;
-
-    edges++;
-
-    delete [] edgeArray;
-    edgeArray = temp;
-
-}
-
-int Graph::minDistance(int *dist, bool *sptSet) {
-    int min = INF, min_index;
-
-    for(int v = 0; v < vertices; v++) {
-        if(sptSet[v] == false && dist[v] <= min)
-            min = dist[v], min_index = v;
-    }
-
-    return min_index;
 }
 
 void Graph::dijkstraMatrix(int s) {
-    int dist[vertices];
-    bool sptSet[vertices];
+    priority_queue< iPair, vector<iPair>, greater<>> pq;
 
-    for(int i = 0; i < vertices; i++) {
-        dist[i] = INF, sptSet[i] = false;
-    }
+    vector<int> dist(vertices, INF);
 
+    pq.push(make_pair(0, s));
     dist[s] = 0;
 
-    for(int count = 0; count < vertices - 1; count++) {
-        int u = minDistance(dist, sptSet);
-        sptSet[u] = true;
+    while(!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
 
         for(int v = 0; v < vertices; v++) {
-            if(!sptSet[v] && adjacencyMatrix[u][v] && dist[u] != INF
+            if(adjacencyMatrix[u][v] && dist[u] != INF
             && dist[u] + adjacencyMatrix[u][v] < dist[v]) {
                 dist[v] = dist[u] + adjacencyMatrix[u][v];
+                pq.push(make_pair(dist[v], v));
             }
         }
     }
@@ -162,20 +146,21 @@ void Graph::BellmanFord(int s) {
     }
     dist[s] = 0;
 
+    vector< pair<int, iPair> >::iterator it;
     for(int i = 1; i <= vertices - 1; i++) {
-        for(int j = 0; j < edges; j++) {
-            int u = edgeArray[j].src;
-            int v = edgeArray[j].dest;
-            int weight = edgeArray[j].weight;
+        for(it = edge.begin(); it != edge.end(); it++) {
+            int u = it->second.first;
+            int v = it->second.second;
+            int weight = it->first;
             if(dist[u] != INF && dist[u] + weight < dist[v])
                 dist[v] = dist[u] + weight;
         }
     }
 
-    for(int i = 0; i < edges; i++) {
-        int u = edgeArray[i].src;
-        int v = edgeArray[i].dest;
-        int weight = edgeArray[i].weight;
+    for(it = edge.begin(); it != edge.end(); it++) {
+        int u = it->second.first;
+        int v = it->second.second;
+        int weight = it->first;
         if(dist[u] != INF && dist[u] + weight < dist[v])
             printf("Graf posiada cykl ujemny.\n");
     }
@@ -185,3 +170,100 @@ void Graph::BellmanFord(int s) {
         printf("%d \t\t %d\n", i, dist[i]);
     }
 }
+
+void Graph::addUndirectedEdge(int u, int v, int w) {
+    adjList[u].push_back((make_pair(v, w)));
+    adjList[v].push_back((make_pair(u, w)));
+
+    adjacencyMatrix[u][v] = w;
+    adjacencyMatrix[v][u] = w;
+
+    //edge.push_back({w, {u, v}});
+}
+
+void Graph::PrimList() {
+    priority_queue< iPair, vector <iPair>, greater<iPair> > pq;
+    int src = 0;
+    vector<int> key(vertices, INF);
+    vector<int> parent(vertices, -1);
+    vector<bool> inMST(vertices, false);
+
+    pq.push(make_pair(0, src));
+    key[src] = 0;
+
+    while(!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+
+        inMST[u] = true;
+        list< pair<int, int> >::iterator i;
+        for(i = adjList[u].begin(); i != adjList[u].end(); ++i) {
+            int v = (*i).first;
+            int weight = (*i).second;
+
+            if(inMST[v] == false && key[v] > weight) {
+                key[v] = weight;
+                pq.push(make_pair(key[v], v));
+                parent[v] = u;
+            }
+        }
+    }
+    for(int i = 1; i < vertices; ++i) {
+        printf("%d - %d : %d\n", parent[i], i, key[i]);
+    }
+}
+
+void Graph::PrimMatrix() {
+    priority_queue<iPair, vector<iPair>, greater<>> pq;
+    int src = 0;
+    vector<int> parent(vertices, -1);
+    vector<int> key(vertices, INF);
+    vector<bool> inMST(vertices, false);
+
+    pq.push(make_pair(0, src));
+    key[src] = 0;
+
+    while(!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+
+        inMST[u] = true;
+        for(int v = 0; v < vertices; v++) {
+            if(adjacencyMatrix[u][v] && inMST[v] == false &&
+            adjacencyMatrix[u][v] < key[v]) {
+                parent[v] = u;
+                key[v] = adjacencyMatrix[u][v];
+                pq.push(make_pair(key[v], v));
+            }
+        }
+    }
+
+
+    for(int i = 1; i < vertices; i++) {
+        printf("%d - %d : %d\n", parent[i], i, adjacencyMatrix[i][parent[i]]);
+    }
+}
+
+int Graph::kruskal() {
+    int mstWt = 0;
+    sort(edge.begin(), edge.end());
+
+    DisjointSets ds(vertices);
+
+    vector< pair<int, iPair> >::iterator i;
+    for(i = edge.begin(); i != edge.end(); i++) {
+        int u = i->second.first;
+        int v = i->second.second;
+
+        int setU = ds.find(u);
+        int setV = ds.find(v);
+
+        if(setU != setV) {
+            printf("%d - %d\n", u, v);
+            mstWt += i->first;
+            ds.merge(setU, setV);
+        }
+    }
+    return mstWt;
+}
+

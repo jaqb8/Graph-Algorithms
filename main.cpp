@@ -3,20 +3,31 @@
 #include "Graph.h"
 
 int main() {
-    Graph g(6, 9);
+    Graph g(5, 7);
 
-    g.addEdge(0, 1, 3);
-    g.addEdge(0, 4, 3);
-    g.addEdge(1, 2, 1);
-    g.addEdge(2, 3, 3);
-    g.addEdge(2, 5, 1);
-    g.addEdge(3, 1, 3);
-    g.addEdge(4, 5, 2);
-    g.addEdge(5, 0, 6);
-    g.addEdge(5, 3, 1);
+    g.addUndirectedEdge(0, 1, 3);
+    g.addUndirectedEdge(0, 2, 1);
+    g.addUndirectedEdge(1, 2, 3);
+    g.addUndirectedEdge(1, 3, 4);
+    g.addUndirectedEdge(1, 4, 2);
+    g.addUndirectedEdge(2, 3, 6);
+    g.addUndirectedEdge(3, 4, 5);
 
-    g.BellmanFord(0);
-    g.dijkstraMatrix(0);
+    for(int i = 0; i < 5; i++) {
+        for(int j = 0; j < 5; j++) {
+            printf("%d ", g.adjacencyMatrix[i][j]);
+        }
+        printf("\n");
+    }
+
+    g.getEdgesMatrix();
+    printf("\n");
+
+    vector<pair<int, iPair>>::iterator i;
+    for(i = g.edge.begin(); i != g.edge.end(); i++) {
+        printf("(%d, %d): %d\n", i->second.first, i->second.second, i->first);
+    }
+
 
 
     return 0;
