@@ -8,17 +8,26 @@
 #include <iostream>
 #include <fstream>
 #include "Graph.h"
-#include "ListElem.h"
+
+using namespace std;
 
 
 class UserInterface {
+private:
+    int vertices;
+    int edges;
+    int src = 0;
+    bool begin = true;
+    int input, value1, value2;
+    string fileName;
+
 public:
-    void graphGenerationMethod();
-    void loadFromFile();
-
-    bool beg = true;
-    Graph *graph;
-
+    void loadFromFile(string fileName);
+    void loadFromFileMST(string fileName);
+    void randomGraph(int v, int d);
+    void selectProblem();
+    void selectAlgorithm(int problem);
+    Graph *g;
 };
 
 

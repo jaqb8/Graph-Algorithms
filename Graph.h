@@ -10,6 +10,7 @@
 #include <list>
 #include <queue>
 #include <algorithm>
+#include <fstream>
 #include "DisjointSets.h"
 
 
@@ -21,26 +22,30 @@ typedef pair<int, int> iPair;
 
 class Graph {
 public:
-    Graph(int v, int e);
+    Graph(int v);
     ~Graph();
     void print();
+    void addEdge(int u, int v, int w);
     void dijkstraList(int s);
     void dijkstraMatrix(int s);
-    void BellmanFord(int s);
-    void addEdge(int u, int v, int w);
-    void addUndirectedEdge(int u, int v, int w);
-    void PrimList();
-    void PrimMatrix();
-    int kruskal();
-    void getEdgesMatrix();
-    vector< pair<int, iPair> > edge;
-    int **adjacencyMatrix;
+    void BellmanFordList(int s);
+    void BellmanFordMatrix(int s);
+    int PrimList();
+    int PrimMatrix();
+    int KruskalList();
+    int KruskalMatrix();
 
 private:
     int vertices;
-    int edges;
     list< pair<int, int> > *adjList;
+    int **adjacencyMatrix;
+    vector< pair<int, iPair> > edge;
+    void makeUndirected();
+    void createSpanningTree();
+    void getEdgesMatrix();
+    void getEdgesList();
 
+    friend class UserInterface;
 
 };
 

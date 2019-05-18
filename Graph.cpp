@@ -7,69 +7,68 @@
 using namespace std;
 
 
-Graph::Graph(int v, int e) {
+Graph::Graph(int v) {
     vertices = v;
-    edges = 0;
     adjacencyMatrix = new int * [vertices];
     adjList = new list<iPair> [vertices];
 
-    for(int i = 0; i < vertices; i++) adjacencyMatrix[i] = new int[vertices];
-    for(int i = 0; i < vertices; i++)
-        for(int j = 0; j < vertices; j++) adjacencyMatrix[i][j] = 0;
-
+    for(int i = 0; i < vertices; i++) {
+        adjacencyMatrix[i] = new int[vertices];
+        for(int j = 0; j < vertices; j++) {
+            adjacencyMatrix[i][j] = 0;
+        }
+    }
 }
 
 Graph::~Graph() {
-
+    for(int i = 0; i < vertices; i++) {
+        delete [] adjacencyMatrix[i];
+    }
+    delete [] adjacencyMatrix;
+    delete [] adjList;
 }
 
 void Graph::print() {
-    cout << "Maciez sasiedztwa: " << endl;
-    int i;
-
-    cout << "       ";
-    for(i = 0; i < edges; i++) {
-        cout << setw(3) << i;
+    printf("Maciez sasiedztwa: \n");
+    for(int i = 0; i < vertices; i++) {
+        for(int j = 0; j < vertices; j++) {
+            printf("%5d", adjacencyMatrix[i][j]);
+        }
+        printf("\n");
     }
 
-    cout << endl << "       ";
-    for(i = 0; i < edges; i++) {
-        cout << setw(3) << "-";
+    printf("\n\n");
+
+    printf("Lista sasiadow: \n");
+    for(int i = 0; i < vertices; i++){
+        printf("u[%d]: ", i);
+        list<iPair>::iterator it;
+        for(it = adjList[i].begin(); it != adjList[i].end(); it++) {
+            printf("(v:%d, w:%d) -> ", it->first, it->second);
+        }
+        printf("\n");
     }
-
-    cout << endl;
-
-    for(i = 0; i < vertices; i++) {
-        cout << setw(3) << i << " | ";
-        for(int j = 0; j < edges; j++) cout << adjacencyMatrix[i][j];
-        cout << endl;
-    }
-
-    cout << endl;
-
-//    cout << endl << endl << "Lista sasiadow: " << endl;
-//    for(i = 0; i < vertices; i++) {
-//        cout << "[" << i << "] = ";
-//        e1 = adjacencyList[i];
-//        while(e1) {
-//            cout << setw(3) << e1->data << "(" << e1->weight << ")";
-//            e1 = e1->next;
-//        }
-//        cout << endl;
-//    }
 }
 
 void Graph::getEdgesMatrix() {
-    int diagonal = 1;
 
     for(int i = 0; i < vertices; i++) {
-        for(int j = 0; j < diagonal; j++) {
+        for(int j = 0; j < vertices; j++) {
             int weight = adjacencyMatrix[i][j];
             if(weight != 0) {
                 edge.push_back({weight, {i, j}});
             }
         }
-        diagonal++;
+    }
+}
+
+void Graph::getEdgesList() {
+    for(int i = 0; i < vertices; i++) {
+        list<iPair>::iterator it;
+        for(it = adjList[i].begin(); it != adjList[i].end(); it++) {
+            int weight = it->second;
+            edge.push_back({weight, {i, it->first}});
+        }
     }
 }
 
@@ -97,7 +96,7 @@ void Graph::dijkstraList(int s) {
         }
     }
 
-    printf("Vertex    Distance from source\n");
+    printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
     }
@@ -107,8 +106,6 @@ void Graph::dijkstraList(int s) {
 void Graph::addEdge(int u, int v, int w) {
     adjList[u].push_back(make_pair(v, w));
     adjacencyMatrix[u][v] = w;
-    edge.push_back({w, {u, v}});
-
 }
 
 void Graph::dijkstraMatrix(int s) {
@@ -132,13 +129,14 @@ void Graph::dijkstraMatrix(int s) {
         }
     }
 
-    printf("Vertex    Distance from source\n");
+    printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
     }
 }
 
-void Graph::BellmanFord(int s) {
+void Graph::BellmanFordList(int s) {
+    getEdgesList();
     int dist[vertices];
 
     for(int i = 0; i < vertices; i++) {
@@ -165,25 +163,50 @@ void Graph::BellmanFord(int s) {
             printf("Graf posiada cykl ujemny.\n");
     }
 
-    printf("Vertex    Distance from source\n");
+    printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
     }
 }
 
-void Graph::addUndirectedEdge(int u, int v, int w) {
-    adjList[u].push_back((make_pair(v, w)));
-    adjList[v].push_back((make_pair(u, w)));
+void Graph::BellmanFordMatrix(int s) {
+    getEdgesMatrix();
+    int dist[vertices];
 
-    adjacencyMatrix[u][v] = w;
-    adjacencyMatrix[v][u] = w;
+    for(int i = 0; i < vertices; i++) {
+        dist[i] = INF;
+    }
+    dist[s] = 0;
 
-    //edge.push_back({w, {u, v}});
+    vector< pair<int, iPair> >::iterator it;
+    for(int i = 1; i <= vertices - 1; i++) {
+        for(it = edge.begin(); it != edge.end(); it++) {
+            int u = it->second.first;
+            int v = it->second.second;
+            int weight = it->first;
+            if(dist[u] != INF && dist[u] + weight < dist[v])
+                dist[v] = dist[u] + weight;
+        }
+    }
+
+    for(it = edge.begin(); it != edge.end(); it++) {
+        int u = it->second.first;
+        int v = it->second.second;
+        int weight = it->first;
+        if(dist[u] != INF && dist[u] + weight < dist[v])
+            printf("Graf posiada cykl ujemny.\n");
+    }
+
+    printf("Wierzcholek:    Odleglosc od zrodla:\n");
+    for(int i = 0; i < vertices; i++) {
+        printf("%d \t\t %d\n", i, dist[i]);
+    }
 }
 
-void Graph::PrimList() {
+int Graph::PrimList() {
     priority_queue< iPair, vector <iPair>, greater<iPair> > pq;
     int src = 0;
+    int mstWt = 0;
     vector<int> key(vertices, INF);
     vector<int> parent(vertices, -1);
     vector<bool> inMST(vertices, false);
@@ -209,13 +232,17 @@ void Graph::PrimList() {
         }
     }
     for(int i = 1; i < vertices; ++i) {
-        printf("%d - %d : %d\n", parent[i], i, key[i]);
+        mstWt += key[i];
+        printf("%d - %d\n", parent[i], i);
     }
+
+    return mstWt;
 }
 
-void Graph::PrimMatrix() {
+int Graph::PrimMatrix() {
     priority_queue<iPair, vector<iPair>, greater<>> pq;
     int src = 0;
+    int mstWt = 0;
     vector<int> parent(vertices, -1);
     vector<int> key(vertices, INF);
     vector<bool> inMST(vertices, false);
@@ -240,11 +267,15 @@ void Graph::PrimMatrix() {
 
 
     for(int i = 1; i < vertices; i++) {
-        printf("%d - %d : %d\n", parent[i], i, adjacencyMatrix[i][parent[i]]);
+        mstWt += adjacencyMatrix[i][parent[i]];
+        printf("%d - %d\n", parent[i], i);
     }
+
+    return mstWt;
 }
 
-int Graph::kruskal() {
+int Graph::KruskalList() {
+    getEdgesList();
     int mstWt = 0;
     sort(edge.begin(), edge.end());
 
@@ -266,4 +297,72 @@ int Graph::kruskal() {
     }
     return mstWt;
 }
+
+int Graph::KruskalMatrix() {
+    getEdgesMatrix();
+    int mstWt = 0;
+    sort(edge.begin(), edge.end());
+
+    DisjointSets ds(vertices);
+
+    vector< pair<int, iPair> >::iterator i;
+    for(i = edge.begin(); i != edge.end(); i++) {
+        int u = i->second.first;
+        int v = i->second.second;
+
+        int setU = ds.find(u);
+        int setV = ds.find(v);
+
+        if(setU != setV) {
+            printf("%d - %d\n", u, v);
+            mstWt += i->first;
+            ds.merge(setU, setV);
+        }
+    }
+    return mstWt;
+}
+
+void Graph::makeUndirected() {
+    int diagonal = 1;
+
+    for(int i = 0; i < vertices; i++){
+        for(int j = diagonal; j < vertices; j++) {
+            if(adjacencyMatrix[i][j] != 0)
+                adjacencyMatrix[j][i] = adjacencyMatrix[i][j];
+        }
+        diagonal++;
+    }
+
+    list<pair<int, int>> *reverseAdjList = new list<iPair> [vertices];
+    for(int i = 0; i < vertices; i++){
+        list<iPair>::iterator it;
+        for(it = adjList[i].begin(); it != adjList[i].end(); it++) {
+            reverseAdjList[it->first].push_back(make_pair(i, it->second));
+        }
+    }
+
+    for(int i = 0; i < vertices; i++) {
+        list<iPair>::iterator it;
+        for(it = reverseAdjList[i].begin(); it != reverseAdjList[i].end(); it++) {
+            adjList[i].push_back(make_pair(it->first, it->second));
+        }
+    }
+
+    delete reverseAdjList;
+
+}
+
+void Graph::createSpanningTree() {
+    int i = 0, j = 1;
+
+    while(i < vertices - 1 && j < vertices) {
+        int random = rand() % 10 + 1;
+        adjacencyMatrix[i][j] = random;
+        adjList[i].push_back(make_pair(j, random));
+        i++;
+        j++;
+    }
+
+}
+
 
