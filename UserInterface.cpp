@@ -67,7 +67,7 @@ void UserInterface::randomGraph(int v, int d) {
 
     // Ilość pozostałych krawędzi do wygenerowania
     int count = vertices - 1;
-    while(count != edges) {
+    while(count != edges && count < edges) {
         int i = rand() % vertices;
         int j = rand() % vertices;
         int weight = rand() % 10 + 1;

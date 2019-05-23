@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include "Graph.h"
 
 using namespace std;
