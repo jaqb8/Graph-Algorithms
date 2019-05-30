@@ -13,7 +13,7 @@ public:
     DisjointSets(int n) {
         this->n = n;
         parent = new int[n + 1];
-        rank = new int[n + 1];
+        rank = new int[n + 1];      // ranga == "wysokość" drzewa
 
         for(int i = 0; i <= n; i++) {
             rank[i] = 0;
@@ -21,6 +21,7 @@ public:
         }
     }
 
+    // zwraca id zbioru do którego należy u
     int find(int u) {
         if(u != parent[u]) parent[u] = find(parent[u]);
         return parent[u];
@@ -32,6 +33,8 @@ public:
         if(rank[x] > rank[y]) parent[y] = x;
         else parent[x] = y;
 
+        // jeśli drzewa mają równe rangi
+        // to waga drzewa wynikowego zwiększa się o 1
         if(rank[x] == rank[y]) rank[y]++;
     }
 };

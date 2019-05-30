@@ -76,6 +76,7 @@ void Graph::dijkstraList(int s) {
     priority_queue< iPair, vector <iPair>, greater<iPair> > pq;
 
     vector<int> dist(vertices, INF);
+    vector<int> parent(vertices, -1);
 
     pq.push(make_pair(0, s));
     dist[s] = 0;
@@ -89,8 +90,10 @@ void Graph::dijkstraList(int s) {
             int v = (*i).first;
             int weight = (*i).second;
 
+            // relaksacja
             if(dist[v] > dist[u] + weight) {
                 dist[v] = dist[u] + weight;
+                parent[v] = u;
                 pq.push(make_pair(dist[v], v));
             }
         }
@@ -99,6 +102,17 @@ void Graph::dijkstraList(int s) {
     printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
+    }
+
+    printf("\n");
+    for(int i = 0; i < vertices; i++) {
+        int x = parent[i];
+        printf("%d. ", i);
+        while(x >= 0) {
+            printf("%d -> ", x);
+            x = parent[x];
+        }
+        printf("\n");
     }
 
 }
@@ -112,6 +126,7 @@ void Graph::dijkstraMatrix(int s) {
     priority_queue< iPair, vector<iPair>, greater<>> pq;
 
     vector<int> dist(vertices, INF);
+    vector<int> parent(vertices, -1);
 
     pq.push(make_pair(0, s));
     dist[s] = 0;
@@ -124,6 +139,7 @@ void Graph::dijkstraMatrix(int s) {
             if(adjacencyMatrix[u][v] && dist[u] != INF
             && dist[u] + adjacencyMatrix[u][v] < dist[v]) {
                 dist[v] = dist[u] + adjacencyMatrix[u][v];
+                parent[v] = u;
                 pq.push(make_pair(dist[v], v));
             }
         }
@@ -132,6 +148,17 @@ void Graph::dijkstraMatrix(int s) {
     printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
+    }
+
+    printf("\n");
+    for(int i = 0; i < vertices; i++) {
+        int x = parent[i];
+        printf("%d. ", i);
+        while(x >= 0) {
+            printf("%d -> ", x);
+            x = parent[x];
+        }
+        printf("\n");
     }
 }
 
@@ -144,14 +171,18 @@ void Graph::BellmanFordList(int s) {
     }
     dist[s] = 0;
 
+    vector<int> parent(vertices, -1);
+
     vector< pair<int, iPair> >::iterator it;
     for(int i = 1; i <= vertices - 1; i++) {
         for(it = edge.begin(); it != edge.end(); it++) {
             int u = it->second.first;
             int v = it->second.second;
             int weight = it->first;
-            if(dist[u] != INF && dist[u] + weight < dist[v])
+            if(dist[u] != INF && dist[u] + weight < dist[v]) {
                 dist[v] = dist[u] + weight;
+                parent[v] = u;
+            }
         }
     }
 
@@ -166,6 +197,17 @@ void Graph::BellmanFordList(int s) {
     printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
+    }
+
+    printf("\n");
+    for(int i = 0; i < vertices; i++) {
+        int x = parent[i];
+        printf("%d. ", i);
+        while(x >= 0) {
+            printf("%d -> ", x);
+            x = parent[x];
+        }
+        printf("\n");
     }
 }
 
@@ -178,14 +220,18 @@ void Graph::BellmanFordMatrix(int s) {
     }
     dist[s] = 0;
 
+    vector<int> parent(vertices, -1);
+
     vector< pair<int, iPair> >::iterator it;
     for(int i = 1; i <= vertices - 1; i++) {
         for(it = edge.begin(); it != edge.end(); it++) {
             int u = it->second.first;
             int v = it->second.second;
             int weight = it->first;
-            if(dist[u] != INF && dist[u] + weight < dist[v])
+            if(dist[u] != INF && dist[u] + weight < dist[v]) {
                 dist[v] = dist[u] + weight;
+                parent[v] = u;
+            }
         }
     }
 
@@ -193,13 +239,26 @@ void Graph::BellmanFordMatrix(int s) {
         int u = it->second.first;
         int v = it->second.second;
         int weight = it->first;
-        if(dist[u] != INF && dist[u] + weight < dist[v])
+        if(dist[u] != INF && dist[u] + weight < dist[v]) {
             printf("Graf posiada cykl ujemny.\n");
+            return;
+        }
     }
 
     printf("Wierzcholek:    Odleglosc od zrodla:\n");
     for(int i = 0; i < vertices; i++) {
         printf("%d \t\t %d\n", i, dist[i]);
+    }
+
+    printf("\n");
+    for(int i = 0; i < vertices; i++) {
+        int x = parent[i];
+        printf("%d. ", i);
+        while(x >= 0) {
+            printf("%d -> ", x);
+            x = parent[x];
+        }
+        printf("\n");
     }
 }
 
@@ -207,7 +266,7 @@ int Graph::PrimList() {
     priority_queue< iPair, vector <iPair>, greater<iPair> > pq;
     int src = 0;
     int mstWt = 0;
-    vector<int> key(vertices, INF);
+    vector<int> key(vertices, INF);         // wagi najmniejszych krawędzi
     vector<int> parent(vertices, -1);
     vector<bool> inMST(vertices, false);
 
@@ -277,6 +336,7 @@ int Graph::PrimMatrix() {
 int Graph::KruskalList() {
     getEdgesList();
     int mstWt = 0;
+    // sortowanie rosnąco
     sort(edge.begin(), edge.end());
 
     DisjointSets ds(vertices);
